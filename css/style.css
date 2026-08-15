@@ -446,6 +446,19 @@ button {
   color: #444440;
 }
 
+.experience-highlights {
+  display: grid;
+  gap: 8px;
+  max-width: 720px;
+  margin: 18px 0 0;
+  padding-left: 1.15em;
+  color: #444440;
+}
+
+.experience-highlights li::marker {
+  color: var(--muted);
+}
+
 .section {
   padding: clamp(90px, 12vw, 180px) var(--page-gutter);
 }
