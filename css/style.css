@@ -459,6 +459,35 @@ button {
   color: var(--muted);
 }
 
+.experience-projects {
+  display: grid;
+  max-width: 720px;
+  margin-top: 18px;
+  border-top: 1px solid var(--line);
+}
+
+.experience-projects a {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 20px;
+  padding: 13px 0;
+  color: var(--ink);
+  border-bottom: 1px solid var(--line);
+  font-size: 0.92rem;
+  transition: color 180ms ease, padding 180ms ease;
+}
+
+.experience-projects a span:last-child {
+  color: var(--muted);
+  font-size: 0.78rem;
+}
+
+.experience-projects a:hover {
+  padding-left: 8px;
+  color: var(--muted);
+}
+
 .section {
   padding: clamp(90px, 12vw, 180px) var(--page-gutter);
 }
