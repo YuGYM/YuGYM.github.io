@@ -4,8 +4,7 @@
 
 ## 上傳前請先修改
 
-1. 將 `index.html` 內兩處 `hello@yourdomain.com` 換成你的 Email。
-2. 將首頁自我介紹、Profile 與 Capabilities 改成履歷上的正式內容。
+
 3. 在 `js/main.js` 的 `projects` 陣列中替換 9 個示範專案；每筆資料會自動產生縮略卡與完整案例視窗。
 4. 若 GitHub 帳號不是 `YuGYM`，請修改頁尾 GitHub 連結。
 
