@@ -366,6 +366,22 @@ button {
   filter: blur(2px);
   opacity: 0.72;
   will-change: transform;
+  animation: orb-gradient 28s ease-in-out infinite alternate;
+}
+
+@keyframes orb-gradient {
+  0% {
+    filter: blur(2px) hue-rotate(0deg);
+    transform: scale(1) rotate(0deg);
+  }
+  50% {
+    filter: blur(5px) hue-rotate(70deg);
+    transform: scale(1.04) rotate(8deg);
+  }
+  100% {
+    filter: blur(2px) hue-rotate(145deg);
+    transform: scale(1) rotate(-4deg);
+  }
 }
 
 .hero-orb-a {
@@ -382,6 +398,52 @@ button {
   width: clamp(140px, 18vw, 300px);
   aspect-ratio: 1;
   background: radial-gradient(circle, #e8e8e2 0, transparent 68%);
+}
+
+.experience {
+  background: var(--paper);
+}
+
+.experience-list {
+  margin-top: 72px;
+  border-top: 1px solid var(--line);
+}
+
+.experience-item {
+  display: grid;
+  grid-template-columns: minmax(150px, 0.38fr) minmax(0, 1fr);
+  gap: clamp(24px, 6vw, 100px);
+  padding: 34px 0;
+  border-bottom: 1px solid var(--line);
+}
+
+.experience-period {
+  color: var(--muted);
+  font-size: 0.82rem;
+  font-weight: 600;
+  letter-spacing: 0.04em;
+}
+
+.experience-item h3 {
+  margin: 0;
+  font-size: clamp(1.35rem, 2.3vw, 2.1rem);
+  font-weight: 500;
+  letter-spacing: -0.03em;
+}
+
+.experience-role {
+  margin: 6px 0 12px;
+  color: var(--muted);
+  font-size: 0.82rem;
+  font-weight: 600;
+  letter-spacing: 0.08em;
+  text-transform: uppercase;
+}
+
+.experience-item p:last-child {
+  max-width: 720px;
+  margin: 0;
+  color: #444440;
 }
 
 .section {
@@ -906,6 +968,7 @@ button {
   .filter-row { margin-top: 44px; }
   .project-grid { grid-template-columns: 1fr; }
   .project-thumb { border-radius: 22px; }
+  .experience-item { grid-template-columns: 1fr; gap: 10px; }
 
   .contact { min-height: auto; }
   .contact-link { align-items: flex-end; }

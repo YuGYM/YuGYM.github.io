@@ -265,7 +265,7 @@ document.querySelectorAll(".reveal").forEach((element, index) => {
   revealObserver.observe(element);
 });
 
-const sections = document.querySelectorAll("#home, #about-work, #contact");
+const sections = document.querySelectorAll("#home, #about-work, #experience, #contact");
 const navLinks = document.querySelectorAll(".nav-link");
 const sectionObserver = new IntersectionObserver((entries) => {
   entries.forEach((entry) => {
