@@ -128,9 +128,8 @@ button {
   place-items: center;
   width: 32px;
   height: 32px;
-  color: var(--paper);
-  background: var(--ink);
   border-radius: 50%;
+  object-fit: contain;
   transition: transform 500ms var(--ease-out);
 }
 
