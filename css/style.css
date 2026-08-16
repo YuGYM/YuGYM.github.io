@@ -50,6 +50,10 @@ body.is-locked {
   overflow: hidden;
 }
 
+body.is-menu-open {
+  overflow: hidden;
+}
+
 button,
 a {
   font: inherit;
@@ -113,7 +117,7 @@ button {
   min-height: var(--header-height);
   padding: 16px var(--page-gutter);
   border-bottom: 1px solid transparent;
-  transition: background-color 250ms ease, border-color 250ms ease, min-height 250ms ease;
+  transition: color 250ms ease, background-color 250ms ease, border-color 250ms ease, min-height 250ms ease;
 }
 
 .site-header.is-scrolled {
@@ -204,6 +208,45 @@ button {
 
 .menu-toggle i {
   font-size: 1.35rem;
+}
+
+.site-header.is-contact {
+  color: #fff;
+  background-color: transparent;
+  border-color: transparent;
+  backdrop-filter: none;
+  -webkit-backdrop-filter: none;
+}
+
+.site-header.is-contact .brand,
+.site-header.is-contact .nav-link,
+.site-header.is-contact .nav-link:hover,
+.site-header.is-contact .nav-link.is-active {
+  color: #fff;
+}
+
+.site-header.is-contact .nav-link::after {
+  background: #fff;
+}
+
+.site-header.is-contact .menu-toggle {
+  color: #fff;
+  background: rgb(10 10 10 / 72%);
+  border-color: rgb(255 255 255 / 35%);
+}
+
+.site-header.is-contact .brand-mark {
+  animation: contact-logo-glow 2.8s ease-in-out infinite;
+}
+
+@keyframes contact-logo-glow {
+  0%,
+  100% {
+    filter: drop-shadow(0 0 3px rgb(172 118 255 / 45%)) drop-shadow(0 0 8px rgb(135 72 255 / 28%));
+  }
+  50% {
+    filter: drop-shadow(0 0 7px rgb(203 164 255 / 95%)) drop-shadow(0 0 20px rgb(139 73 255 / 78%));
+  }
 }
 
 .hero {
@@ -540,35 +583,11 @@ button {
   color: var(--muted);
 }
 
-.filter-row {
-  display: flex;
-  flex-wrap: wrap;
-  gap: 8px;
-  margin: 64px 0 28px;
-}
-
-.filter-button {
-  min-height: 44px;
-  padding: 8px 18px;
-  color: var(--muted);
-  background: transparent;
-  border: 1px solid #c9c9c5;
-  border-radius: 999px;
-  cursor: pointer;
-  transition: color 180ms ease, background-color 180ms ease, border-color 180ms ease;
-}
-
-.filter-button:hover,
-.filter-button.is-active {
-  color: var(--paper);
-  background: var(--ink);
-  border-color: var(--ink);
-}
-
 .project-grid {
   display: grid;
   grid-template-columns: repeat(3, minmax(0, 1fr));
   gap: clamp(18px, 2.5vw, 36px);
+  margin-top: 64px;
 }
 
 .project-card {
@@ -732,10 +751,63 @@ button {
   font-size: 0.9rem;
 }
 
+.tool-icons {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 14px;
+  margin: 14px 0 0;
+  padding: 0;
+  list-style: none;
+}
+
+.tool-icon {
+  display: grid;
+  place-items: center;
+  width: 58px;
+  height: 58px;
+  padding: 10px;
+  background: #f7f7f5;
+  border: 1px solid var(--line);
+  border-radius: 15px;
+  transition: background-color 180ms ease, border-color 180ms ease, transform 300ms var(--ease-out);
+}
+
+.tool-icon:hover {
+  background: var(--paper);
+  border-color: #bdbdb7;
+  transform: translateY(-4px);
+}
+
+.tool-icon img {
+  display: block;
+  width: 34px;
+  height: 34px;
+  max-width: 100%;
+  max-height: 100%;
+  object-fit: contain;
+}
+
 .contact {
+  position: relative;
   min-height: 80svh;
   color: var(--paper);
   background: var(--ink);
+  overflow: hidden;
+  isolation: isolate;
+}
+
+.contact-particles {
+  position: absolute;
+  z-index: 0;
+  inset: 0;
+  width: 100%;
+  height: 100%;
+  pointer-events: none;
+}
+
+.contact > :not(.contact-particles) {
+  position: relative;
+  z-index: 1;
 }
 
 .contact .section-index {
@@ -751,21 +823,42 @@ button {
   font-size: clamp(2.8rem, 7.4vw, 8.2rem);
 }
 
+.typing-cursor {
+  display: inline-block;
+  margin-left: 0.08em;
+  color: var(--paper);
+  font-weight: 400;
+  animation: typing-cursor-blink 800ms steps(1, end) infinite;
+}
+
+@keyframes typing-cursor-blink {
+  0%,
+  48% { opacity: 1; }
+  49%,
+  100% { opacity: 0; }
+}
+
 .contact-link {
-  display: flex;
+  display: grid;
+  grid-template-columns: minmax(0, 1fr) auto;
   align-items: center;
-  justify-content: space-between;
-  gap: 30px;
+  gap: clamp(16px, 2vw, 36px);
   padding: 18px 0 34px;
   border-bottom: 1px solid #50504d;
-  font-size: clamp(2.6rem, 7.4vw, 8.2rem);
+  font-size: clamp(2rem, 5.2vw, 6.4rem);
   font-weight: 500;
   line-height: 1.05;
   letter-spacing: -0.055em;
 }
 
+.contact-link span {
+  min-width: 0;
+  overflow-wrap: anywhere;
+}
+
 .contact-link i {
   flex: 0 0 auto;
+  align-self: center;
   font-size: 0.65em;
 }
 
@@ -985,31 +1078,116 @@ button {
     --page-gutter: clamp(20px, 5vw, 40px);
   }
 
+  .brand,
+  .menu-toggle {
+    position: relative;
+    z-index: 102;
+  }
+
   .menu-toggle { display: grid; }
+
+  .menu-toggle i {
+    transition: transform 450ms var(--ease-out);
+  }
+
+  .menu-toggle[aria-expanded="true"] i {
+    transform: rotate(90deg);
+  }
+
+  .contact-particles { display: none; }
 
   .site-nav {
     position: fixed;
-    inset: var(--header-height) 16px auto;
+    z-index: 101;
+    inset: 0;
     display: grid;
-    gap: 0;
-    padding: 12px;
-    background: rgb(255 255 255 / 96%);
-    border: 1px solid var(--line);
-    border-radius: 20px;
-    box-shadow: 0 24px 70px rgb(0 0 0 / 12%);
+    grid-template-columns: 1fr;
+    grid-auto-rows: max-content;
+    align-content: center;
+    justify-items: center;
+    gap: clamp(24px, 6vh, 56px);
+    width: 100%;
+    height: 100vh;
+    height: 100dvh;
+    overflow-y: auto;
+    overscroll-behavior: contain;
+    padding: calc(var(--header-height) + 36px) var(--page-gutter) 40px;
+    background: var(--paper);
+    border: 0;
+    border-radius: 0;
+    box-shadow: none;
     opacity: 0;
+    visibility: hidden;
     pointer-events: none;
-    transform: translateY(-12px) scale(0.98);
-    transition: opacity 180ms ease, transform 300ms var(--ease-out);
+    clip-path: inset(0 0 100% 0);
+    transform: translateY(-12px);
+    transition: opacity 300ms ease, clip-path 550ms var(--ease-out), transform 550ms var(--ease-out), visibility 0s linear 550ms;
+  }
+
+  .site-nav::before {
+    position: absolute;
+    top: var(--header-height);
+    right: 0;
+    left: 0;
+    height: 1px;
+    background: var(--line);
+    content: "";
   }
 
   .site-nav.is-open {
     opacity: 1;
+    visibility: visible;
     pointer-events: auto;
-    transform: translateY(0) scale(1);
+    clip-path: inset(0);
+    transform: translateY(0);
+    transition-delay: 0s;
   }
 
-  .nav-link { padding: 8px 12px; }
+  .site-header.is-menu-open {
+    min-height: var(--header-height);
+    color: var(--ink);
+    background: transparent;
+    border-color: transparent;
+    backdrop-filter: none;
+    -webkit-backdrop-filter: none;
+  }
+
+  .site-header.is-menu-open .brand,
+  .site-header.is-menu-open .nav-link,
+  .site-header.is-menu-open .nav-link:hover,
+  .site-header.is-menu-open .nav-link.is-active {
+    color: var(--ink);
+  }
+
+  .site-header.is-menu-open .menu-toggle {
+    color: var(--ink);
+    background: var(--paper);
+    border-color: #c8c8c4;
+  }
+
+  .nav-link {
+    justify-items: center;
+    width: 100%;
+    min-height: 64px;
+    padding: 10px 12px;
+    color: var(--ink);
+    font-size: clamp(2rem, 8vw, 3.4rem);
+    font-weight: 500;
+    text-align: center;
+    opacity: 0;
+    transform: translateY(26px);
+    transition: color 180ms ease, opacity 380ms ease, transform 550ms var(--ease-out);
+  }
+
+  .site-nav.is-open .nav-link {
+    opacity: 1;
+    transform: translateY(0);
+  }
+
+  .site-nav.is-open .nav-link:nth-child(1) { transition-delay: 100ms; }
+  .site-nav.is-open .nav-link:nth-child(2) { transition-delay: 160ms; }
+  .site-nav.is-open .nav-link:nth-child(3) { transition-delay: 220ms; }
+  .site-nav.is-open .nav-link:nth-child(4) { transition-delay: 280ms; }
   .nav-link::after { display: none; }
 
   .hero { padding-top: 140px; }
@@ -1053,8 +1231,7 @@ button {
     line-height: 1.02;
     overflow-wrap: anywhere;
   }
-  .filter-row { margin-top: 44px; }
-  .project-grid { grid-template-columns: 1fr; }
+  .project-grid { grid-template-columns: 1fr; margin-top: 44px; }
   .project-thumb { border-radius: 22px; }
   .experience-list { margin-top: 44px; }
   .experience-item { grid-template-columns: 1fr; gap: 10px; padding: 26px 0; }
@@ -1101,6 +1278,9 @@ button {
   .project-info { gap: 10px; }
   .project-year { flex: 0 0 auto; }
   .experience-highlights { padding-left: 1.05em; }
+  .tool-icons { gap: 10px; }
+  .tool-icon { width: 52px; height: 52px; padding: 9px; }
+  .tool-icon img { width: 30px; height: 30px; }
   .contact-link { grid-template-columns: 1fr; }
   .contact-link i { display: none; }
   .dialog-close { top: 14px; right: 14px; width: 44px; height: 44px; }
@@ -1122,5 +1302,14 @@ button {
   .reveal {
     opacity: 1;
     transform: none;
+  }
+
+  .site-header.is-contact .brand-mark {
+    animation: none;
+    filter: drop-shadow(0 0 8px rgb(172 118 255 / 75%));
+  }
+
+  .typing-cursor {
+    display: none;
   }
 }

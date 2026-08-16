@@ -169,12 +169,8 @@ function projectCard(project, index) {
   return article;
 }
 
-function renderProjects(filter = "all") {
-  const visibleProjects = filter === "all"
-    ? projects
-    : projects.filter((project) => project.filter === filter);
-
-  grid.replaceChildren(...visibleProjects.map(projectCard));
+function renderProjects() {
+  grid.replaceChildren(...projects.map(projectCard));
 }
 
 function openProject(projectId, trigger) {
@@ -214,17 +210,6 @@ grid.addEventListener("click", (event) => {
   if (trigger) openProject(trigger.dataset.project, trigger);
 });
 
-document.querySelectorAll(".filter-button").forEach((button) => {
-  button.addEventListener("click", () => {
-    document.querySelectorAll(".filter-button").forEach((item) => {
-      const isSelected = item === button;
-      item.classList.toggle("is-active", isSelected);
-      item.setAttribute("aria-pressed", String(isSelected));
-    });
-    renderProjects(button.dataset.filter);
-  });
-});
-
 closeButton.addEventListener("click", closeProject);
 doneButton.addEventListener("click", closeProject);
 dialog.addEventListener("click", (event) => {
@@ -235,20 +220,32 @@ dialog.addEventListener("close", () => {
   lastProjectTrigger?.focus();
 });
 
-menuButton.addEventListener("click", () => {
-  const isOpen = navigation.classList.toggle("is-open");
+function setMenuState(isOpen) {
+  navigation.classList.toggle("is-open", isOpen);
+  document.querySelector("#site-header").classList.toggle("is-menu-open", isOpen);
+  document.body.classList.toggle("is-menu-open", isOpen);
   menuButton.setAttribute("aria-expanded", String(isOpen));
   menuButton.setAttribute("aria-label", isOpen ? "Close navigation" : "Open navigation");
   menuButton.querySelector("i").className = isOpen ? "ph ph-x" : "ph ph-list";
+}
+
+menuButton.addEventListener("click", () => {
+  setMenuState(!navigation.classList.contains("is-open"));
 });
 
 document.querySelectorAll(".site-nav a").forEach((link) => {
-  link.addEventListener("click", () => {
-    navigation.classList.remove("is-open");
-    menuButton.setAttribute("aria-expanded", "false");
-    menuButton.setAttribute("aria-label", "Open navigation");
-    menuButton.querySelector("i").className = "ph ph-list";
-  });
+  link.addEventListener("click", () => setMenuState(false));
+});
+
+document.addEventListener("keydown", (event) => {
+  if (event.key === "Escape" && navigation.classList.contains("is-open")) {
+    setMenuState(false);
+    menuButton.focus();
+  }
+});
+
+window.matchMedia("(min-width: 901px)").addEventListener("change", (event) => {
+  if (event.matches) setMenuState(false);
 });
 
 const revealObserver = new IntersectionObserver((entries) => {
@@ -267,6 +264,172 @@ document.querySelectorAll(".reveal").forEach((element, index) => {
 
 const sections = document.querySelectorAll("#home, #about-work, #experience, #contact");
 const navLinks = document.querySelectorAll(".nav-link");
+const siteHeader = document.querySelector("#site-header");
+const contactSection = document.querySelector("#contact");
+const contactParticlesCanvas = document.querySelector(".contact-particles");
+const contactParticlesContext = contactParticlesCanvas.getContext("2d");
+const desktopPointer = window.matchMedia("(min-width: 901px) and (pointer: fine)");
+const contactParticles = [];
+let contactParticleFrame = null;
+let lastParticlePoint = null;
+let lastParticleEmission = 0;
+
+function resizeContactParticles() {
+  if (!desktopPointer.matches) return;
+
+  const pixelRatio = Math.min(window.devicePixelRatio || 1, 2);
+  const width = contactSection.clientWidth;
+  const height = contactSection.clientHeight;
+  contactParticlesCanvas.width = Math.round(width * pixelRatio);
+  contactParticlesCanvas.height = Math.round(height * pixelRatio);
+  contactParticlesContext.setTransform(pixelRatio, 0, 0, pixelRatio, 0, 0);
+}
+
+function renderContactParticles() {
+  contactParticlesContext.clearRect(0, 0, contactSection.clientWidth, contactSection.clientHeight);
+
+  for (let index = contactParticles.length - 1; index >= 0; index -= 1) {
+    const particle = contactParticles[index];
+    particle.x += particle.velocityX;
+    particle.y += particle.velocityY;
+    particle.velocityY -= 0.004;
+    particle.life -= particle.decay;
+
+    if (particle.life <= 0) {
+      contactParticles.splice(index, 1);
+      continue;
+    }
+
+    contactParticlesContext.globalAlpha = particle.life;
+    contactParticlesContext.fillStyle = "#d7ff3f";
+    contactParticlesContext.beginPath();
+    contactParticlesContext.arc(particle.x, particle.y, particle.size, 0, Math.PI * 2);
+    contactParticlesContext.fill();
+  }
+
+  contactParticlesContext.globalAlpha = 1;
+
+  if (contactParticles.length > 0) {
+    contactParticleFrame = window.requestAnimationFrame(renderContactParticles);
+  } else {
+    contactParticleFrame = null;
+  }
+}
+
+function emitContactParticles(event) {
+  if (!desktopPointer.matches || prefersReducedMotion.matches) return;
+
+  const contactBounds = contactSection.getBoundingClientRect();
+  const isInsideContact = event.clientX >= contactBounds.left
+    && event.clientX <= contactBounds.right
+    && event.clientY >= contactBounds.top
+    && event.clientY <= contactBounds.bottom;
+
+  if (!isInsideContact) {
+    lastParticlePoint = null;
+    return;
+  }
+
+  const now = performance.now();
+  if (now - lastParticleEmission < 18) return;
+  lastParticleEmission = now;
+
+  const point = {
+    x: event.clientX - contactBounds.left,
+    y: event.clientY - contactBounds.top
+  };
+  const distance = lastParticlePoint
+    ? Math.hypot(point.x - lastParticlePoint.x, point.y - lastParticlePoint.y)
+    : 12;
+  const particleCount = Math.min(5, Math.max(1, Math.ceil(distance / 14)));
+
+  for (let index = 0; index < particleCount; index += 1) {
+    const progress = particleCount === 1 ? 1 : index / (particleCount - 1);
+    const originX = lastParticlePoint
+      ? lastParticlePoint.x + (point.x - lastParticlePoint.x) * progress
+      : point.x;
+    const originY = lastParticlePoint
+      ? lastParticlePoint.y + (point.y - lastParticlePoint.y) * progress
+      : point.y;
+    const angle = Math.random() * Math.PI * 2;
+    const speed = 0.25 + Math.random() * 0.85;
+
+    contactParticles.push({
+      x: originX + (Math.random() - 0.5) * 7,
+      y: originY + (Math.random() - 0.5) * 7,
+      velocityX: Math.cos(angle) * speed,
+      velocityY: Math.sin(angle) * speed - 0.18,
+      size: 1 + Math.random() * 2.4,
+      life: 0.65 + Math.random() * 0.35,
+      decay: 0.012 + Math.random() * 0.012
+    });
+  }
+
+  if (contactParticles.length > 180) {
+    contactParticles.splice(0, contactParticles.length - 180);
+  }
+  lastParticlePoint = point;
+
+  if (contactParticleFrame === null) {
+    contactParticleFrame = window.requestAnimationFrame(renderContactParticles);
+  }
+}
+
+window.addEventListener("pointermove", emitContactParticles, { passive: true });
+window.addEventListener("resize", resizeContactParticles, { passive: true });
+resizeContactParticles();
+const typingText = document.querySelector(".typing-text");
+const typingMessage = "Have a project in mind?";
+const typingCycleDuration = 6000;
+let typingAnimationFrame = null;
+let typingCycleStart = null;
+
+function updateTypingAnimation(timestamp) {
+  if (typingCycleStart === null) typingCycleStart = timestamp;
+
+  const elapsed = (timestamp - typingCycleStart) % typingCycleDuration;
+  let characterCount = 0;
+
+  if (elapsed < 1800) {
+    characterCount = Math.floor((elapsed / 1800) * (typingMessage.length + 1));
+  } else if (elapsed < 4200) {
+    characterCount = typingMessage.length;
+  } else if (elapsed < 5400) {
+    characterCount = Math.ceil(typingMessage.length * (1 - (elapsed - 4200) / 1200));
+  }
+
+  typingText.textContent = typingMessage.slice(0, characterCount);
+  typingAnimationFrame = window.requestAnimationFrame(updateTypingAnimation);
+}
+
+function startTypingAnimation() {
+  if (prefersReducedMotion.matches) {
+    typingText.textContent = typingMessage;
+    return;
+  }
+  if (typingAnimationFrame !== null) return;
+
+  typingCycleStart = null;
+  typingAnimationFrame = window.requestAnimationFrame(updateTypingAnimation);
+}
+
+function stopTypingAnimation() {
+  if (typingAnimationFrame !== null) {
+    window.cancelAnimationFrame(typingAnimationFrame);
+    typingAnimationFrame = null;
+  }
+  typingCycleStart = null;
+  typingText.textContent = typingMessage;
+}
+
+const typingObserver = new IntersectionObserver((entries) => {
+  entries.forEach((entry) => {
+    if (entry.isIntersecting) startTypingAnimation();
+    else stopTypingAnimation();
+  });
+}, { threshold: 0.1 });
+
+typingObserver.observe(contactSection);
 const sectionObserver = new IntersectionObserver((entries) => {
   entries.forEach((entry) => {
     if (!entry.isIntersecting) return;
@@ -282,8 +445,11 @@ function updateScrollEffects() {
   const scrollTop = window.scrollY;
   const scrollable = document.documentElement.scrollHeight - window.innerHeight;
   const progress = scrollable > 0 ? scrollTop / scrollable : 0;
+  const contactBounds = contactSection.getBoundingClientRect();
+  const isHeaderOverContact = contactBounds.top <= siteHeader.offsetHeight && contactBounds.bottom > 0;
   document.querySelector(".scroll-progress").style.transform = `scaleX(${progress})`;
-  document.querySelector("#site-header").classList.toggle("is-scrolled", scrollTop > 20);
+  siteHeader.classList.toggle("is-scrolled", scrollTop > 20);
+  siteHeader.classList.toggle("is-contact", isHeaderOverContact);
 
   if (!prefersReducedMotion.matches && scrollTop < window.innerHeight * 1.2) {
     document.querySelector(".hero-orb-a").style.transform = `translate3d(0, ${scrollTop * 0.12}px, 0)`;
@@ -300,6 +466,8 @@ window.addEventListener("scroll", () => {
     scrollTicking = false;
   });
 }, { passive: true });
+
+window.addEventListener("resize", updateScrollEffects, { passive: true });
 
 document.querySelector("#current-year").textContent = new Date().getFullYear();
 updateScrollEffects();
