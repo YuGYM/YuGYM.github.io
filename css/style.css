@@ -1082,6 +1082,27 @@ button {
   font-size: clamp(0.8125rem, 0.75rem + 0.3vw, 1.0625rem);
 }
 
+.dialog-website {
+  display: inline-flex;
+  align-items: center;
+  gap: 8px;
+  margin-top: 22px;
+  padding-bottom: 5px;
+  color: var(--ink);
+  border-bottom: 1px solid currentColor;
+  font-size: clamp(0.875rem, 0.82rem + 0.25vw, 1rem);
+  transition: gap 180ms var(--ease-out), opacity 180ms ease;
+}
+
+.dialog-website:hover {
+  gap: 13px;
+  opacity: 0.62;
+}
+
+.dialog-website[hidden] {
+  display: none;
+}
+
 .dialog-media {
   display: none;
 }
@@ -1101,14 +1122,30 @@ button {
 
 .project-dialog.is-media-project .dialog-media {
   display: grid;
+  grid-template-columns: repeat(2, minmax(0, 1fr));
   gap: clamp(18px, 2.5vw, 36px);
+  align-items: start;
   margin-top: clamp(36px, 4vw, 84px);
 }
 
 .dialog-media-item {
+  display: grid;
   overflow: hidden;
   background: #140c11;
   border-radius: clamp(14px, 2vw, 26px);
+  place-items: center;
+}
+
+.dialog-media-entry {
+  min-width: 0;
+}
+
+.dialog-media-label {
+  margin: 0 0 clamp(12px, 1.5vw, 20px);
+  font-size: clamp(1.25rem, 1rem + 1vw, 2rem);
+  font-weight: 500;
+  line-height: 1.2;
+  letter-spacing: -0.025em;
 }
 
 .dialog-media-item img,
@@ -1116,6 +1153,37 @@ button {
   display: block;
   width: 100%;
   height: auto;
+  object-fit: contain;
+}
+
+.dialog-media-item.is-contained {
+  padding: clamp(16px, 2.5vw, 40px);
+}
+
+.dialog-media-item.is-contained img,
+.dialog-media-item.is-contained video {
+  width: auto;
+  height: auto;
+  max-width: 100%;
+  max-height: min(72svh, 760px);
+  object-fit: contain;
+}
+
+.project-dialog[data-project-id="02"] .dialog-media-item {
+  background: #fff;
+  box-shadow: 0 1px 2.5px rgba(0, 0, 0, 0.15);
+}
+
+.project-dialog[data-project-id="03"] .dialog-media {
+  grid-template-columns: minmax(0, 1fr);
+}
+
+.project-dialog[data-project-id="04"] .dialog-media {
+  grid-template-columns: minmax(0, 1fr);
+}
+
+.project-dialog[data-project-id="06"] .dialog-media {
+  grid-template-columns: minmax(0, 1fr);
 }
 
 .dialog-meta {
@@ -1464,6 +1532,7 @@ button {
 
   .dialog-content { padding-top: 60px; padding-bottom: 72px; }
   .dialog-content h2 { font-size: clamp(2.25rem, 12vw, 4rem); overflow-wrap: anywhere; }
+  .project-dialog.is-media-project .dialog-media { grid-template-columns: 1fr; }
   .dialog-meta { grid-template-columns: 1fr; }
   .case-section { grid-template-columns: 1fr; gap: 12px; }
   .dialog-related-grid { grid-template-columns: 1fr; }
