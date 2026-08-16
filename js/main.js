@@ -2,18 +2,40 @@
 const projects = [
   {
     id: "01",
-    title: "Fintech Dashboard",
-    category: "Product Design",
-    filter: "product",
-    year: "2026",
-    color: "#d7ff3f",
-    summary: "A clearer, faster financial workspace that turns complex account data into confident daily decisions.",
-    role: "Product Designer",
-    duration: "12 weeks",
-    tools: "Figma · Prototype",
-    challenge: "Users needed to understand account performance quickly, but fragmented navigation and dense data made routine decisions slow and error-prone.",
-    approach: "Mapped the highest-frequency jobs, simplified the information architecture, and tested progressive disclosure patterns through interactive prototypes.",
-    outcome: "A focused dashboard system with clearer hierarchy, reusable data components, and a foundation that can scale across future financial products."
+    title: "妖しの湯物語",
+    filter: "visual",
+    color: "#1b1017",
+    tags: ["# ChatGPT", "# Figma Motion"],
+    summary: "此為 Slots 老虎機介面設計，採用日式溫泉與妖怪文化作為視覺主題，結合角色、符號與入場動態，營造鮮明且帶有奇幻氛圍的遊戲體驗。",
+    thumbnail: {
+      src: "assets/projects/ayashi-no-yu/cover-card.jpg",
+      width: 960,
+      height: 720
+    },
+    media: [
+      {
+        type: "image",
+        src: "assets/projects/ayashi-no-yu/component.jpg",
+        width: 1600,
+        height: 878,
+        alt: "妖しの湯物語遊戲元件與角色設計"
+      },
+      {
+        type: "image",
+        src: "assets/projects/ayashi-no-yu/player-entry.jpg",
+        width: 1600,
+        height: 900,
+        alt: "妖しの湯物語玩家入場動態畫面"
+      },
+      {
+        type: "video",
+        src: "assets/projects/ayashi-no-yu/player-entry.webm",
+        poster: "assets/projects/ayashi-no-yu/player-entry.jpg",
+        width: 1920,
+        height: 1080,
+        label: "妖しの湯物語玩家入場動畫"
+      }
+    ]
   },
   {
     id: "02",
@@ -89,51 +111,6 @@ const projects = [
     challenge: "Inconsistent components and undocumented decisions slowed delivery and made new features difficult to maintain.",
     approach: "Audited patterns, established semantic tokens, and worked with engineering to define accessible component behavior and ownership.",
     outcome: "A shared product language with flexible foundations, clearer contribution rules and better consistency between design and code."
-  },
-  {
-    id: "07",
-    title: "Campaign Direction",
-    category: "Visual Design",
-    filter: "visual",
-    year: "2024",
-    color: "#ffcfdf",
-    summary: "An adaptable visual campaign built to stay recognizable across a fast-moving launch.",
-    role: "Art Director",
-    duration: "5 weeks",
-    tools: "Adobe CC · Figma",
-    challenge: "The launch needed visual impact across many formats without fragmenting the core message.",
-    approach: "Created one strong graphic idea, then developed flexible rules for typography, imagery, scale and motion.",
-    outcome: "A consistent campaign family that moves comfortably from large-format moments to compact social placements."
-  },
-  {
-    id: "08",
-    title: "Operations Portal",
-    category: "UI/UX Design",
-    filter: "uiux",
-    year: "2024",
-    color: "#b8e0ef",
-    summary: "A role-aware internal tool that helps teams see priorities and act with confidence.",
-    role: "Product Designer",
-    duration: "11 weeks",
-    tools: "Figma · Workshops",
-    challenge: "Teams relied on scattered tools and manual status checks, creating duplicated work and limited visibility.",
-    approach: "Facilitated workflow workshops, modeled shared objects and designed role-specific views on top of one consistent system.",
-    outcome: "A streamlined operational workspace with clear ownership, faster scanning and fewer handoff gaps."
-  },
-  {
-    id: "09",
-    title: "Future Concept",
-    category: "Concept Design",
-    filter: "visual",
-    year: "2024",
-    color: "#d3d3ce",
-    summary: "An exploratory interface concept investigating what a quieter, more adaptive product could feel like.",
-    role: "Concept Designer",
-    duration: "4 weeks",
-    tools: "Figma · Motion",
-    challenge: "Explore a future-facing interaction model without losing the familiarity users depend on today.",
-    approach: "Used speculative scenarios and motion prototypes to test adaptive information density and contextual controls.",
-    outcome: "A tangible future vision that sparked product discussion and clarified which interaction ideas were ready for near-term testing."
   }
 ];
 
@@ -141,28 +118,61 @@ const grid = document.querySelector("#project-grid");
 const dialog = document.querySelector("#project-dialog");
 const closeButton = dialog.querySelector(".dialog-close");
 const doneButton = dialog.querySelector(".dialog-done");
+const dialogMedia = dialog.querySelector("#dialog-media");
+const dialogRelated = dialog.querySelector("#dialog-related");
 const menuButton = document.querySelector(".menu-toggle");
 const navigation = document.querySelector(".site-nav");
 const prefersReducedMotion = window.matchMedia("(prefers-reduced-motion: reduce)");
 let lastProjectTrigger = null;
+let dialogCloseTimer = null;
+let lockedPageScroll = 0;
+
+function lockPageScroll() {
+  if (document.body.classList.contains("is-locked")) return;
+
+  lockedPageScroll = window.scrollY;
+  document.documentElement.classList.add("is-locked");
+  document.body.style.top = `-${lockedPageScroll}px`;
+  document.body.classList.add("is-locked");
+}
+
+function unlockPageScroll() {
+  const previousScrollBehavior = document.documentElement.style.scrollBehavior;
+
+  document.documentElement.classList.remove("is-locked");
+  document.documentElement.style.scrollBehavior = "auto";
+  document.body.classList.remove("is-locked");
+  document.body.style.removeProperty("top");
+  window.scrollTo(0, lockedPageScroll);
+  document.documentElement.style.scrollBehavior = previousScrollBehavior;
+}
 
 function projectCard(project, index) {
   const article = document.createElement("article");
   article.className = "project-card";
   article.dataset.category = project.filter;
   article.style.animationDelay = `${index * 55}ms`;
+
+  const thumbnail = project.thumbnail
+    ? `<img class="project-thumb-image" src="${project.thumbnail.src}" width="${project.thumbnail.width}" height="${project.thumbnail.height}" alt="" loading="lazy" decoding="async" />`
+    : `<span class="thumb-number">${project.id}</span>`;
+  const projectMeta = project.tags
+    ? `<p class="project-tags">${project.tags.map((tag) => `<span>${tag}</span>`).join("")}</p>`
+    : `<p>${project.category}</p>`;
+  const projectYear = project.year ? `<span class="project-year">${project.year}</span>` : "";
+
   article.innerHTML = `
     <button class="project-trigger" type="button" data-project="${project.id}" aria-label="Open ${project.title} case study">
-      <span class="project-thumb" style="--project-color: ${project.color}">
-        <span class="thumb-number">${project.id}</span>
+      <span class="project-thumb${project.thumbnail ? " has-image" : ""}" style="--project-color: ${project.color}">
+        ${thumbnail}
         <span class="thumb-icon"><i class="ph ph-arrow-up-right" aria-hidden="true"></i></span>
       </span>
       <span class="project-info">
         <span>
           <h3>${project.title}</h3>
-          <p>${project.category}</p>
+          ${projectMeta}
         </span>
-        <span class="project-year">${project.year}</span>
+        ${projectYear}
       </span>
     </button>
   `;
@@ -173,34 +183,106 @@ function renderProjects() {
   grid.replaceChildren(...projects.map(projectCard));
 }
 
+function renderProjectMediaItem(item) {
+  if (item.type === "video") {
+    return `
+      <div class="dialog-media-item">
+        <video controls loop muted playsinline preload="metadata" poster="${item.poster}" width="${item.width}" height="${item.height}" aria-label="${item.label}">
+          <source src="${item.src}" type="video/webm" />
+        </video>
+      </div>
+    `;
+  }
+
+  return `
+    <div class="dialog-media-item">
+      <img src="${item.src}" width="${item.width}" height="${item.height}" alt="${item.alt}" loading="lazy" decoding="async" />
+    </div>
+  `;
+}
+
+function getRelatedProjects(projectId) {
+  const currentIndex = projects.findIndex((project) => project.id === projectId);
+  const offsets = [-1, 1, 2];
+
+  return offsets.map((offset) => {
+    const relatedIndex = (currentIndex + offset + projects.length) % projects.length;
+    return projects[relatedIndex];
+  });
+}
+
+function renderRelatedProjects(projectId) {
+  dialogRelated.innerHTML = getRelatedProjects(projectId).map((project) => {
+    const preview = project.thumbnail
+      ? `<img src="${project.thumbnail.src}" width="${project.thumbnail.width}" height="${project.thumbnail.height}" alt="" loading="lazy" decoding="async" />`
+      : `<span class="dialog-related-placeholder" style="--related-color: ${project.color}">${project.id}</span>`;
+    const category = project.tags ? project.tags.join(" · ") : project.category;
+
+    return `
+      <button class="dialog-related-card" type="button" data-related-project="${project.id}" aria-label="查看專案 ${project.title}">
+        <span class="dialog-related-preview">${preview}</span>
+        <span class="dialog-related-meta">
+          <span>
+            <span class="dialog-related-number">${project.id}</span>
+            <strong>${project.title}</strong>
+            <small>${category}</small>
+          </span>
+          <i class="ph ph-arrow-up-right" aria-hidden="true"></i>
+        </span>
+      </button>
+    `;
+  }).join("");
+}
+
 function openProject(projectId, trigger) {
   const project = projects.find((item) => item.id === projectId);
   if (!project) return;
 
-  lastProjectTrigger = trigger;
-  document.querySelector("#dialog-kicker").textContent = `${project.category} · ${project.year}`;
+  const isDialogOpen = dialog.open;
+  const isMediaProject = Array.isArray(project.media);
+  if (!isDialogOpen) lastProjectTrigger = trigger;
+  dialog.querySelectorAll("video").forEach((video) => video.pause());
+  dialog.classList.toggle("is-media-project", isMediaProject);
+  document.querySelector("#dialog-kicker").textContent = project.tags
+    ? project.tags.join("  ")
+    : `${project.category} · ${project.year}`;
   document.querySelector("#dialog-title").textContent = project.title;
-  document.querySelector("#dialog-summary").textContent = project.summary;
-  document.querySelector("#dialog-challenge").textContent = project.challenge;
-  document.querySelector("#dialog-approach").textContent = project.approach;
-  document.querySelector("#dialog-outcome").textContent = project.outcome;
+  document.querySelector("#dialog-summary").textContent = project.summary || "";
+  document.querySelector("#dialog-challenge").textContent = project.challenge || "";
+  document.querySelector("#dialog-approach").textContent = project.approach || "";
+  document.querySelector("#dialog-outcome").textContent = project.outcome || "";
 
-  const visual = document.querySelector("#dialog-visual");
-  visual.style.setProperty("--dialog-color", project.color);
-  visual.innerHTML = `<span>${project.id}</span>`;
+  dialogMedia.innerHTML = isMediaProject
+    ? project.media.map(renderProjectMediaItem).join("")
+    : "";
 
-  document.querySelector("#dialog-meta").innerHTML = `
+  document.querySelector("#dialog-meta").innerHTML = isMediaProject ? "" : `
     <div><span>Role</span><strong>${project.role}</strong></div>
     <div><span>Duration</span><strong>${project.duration}</strong></div>
     <div><span>Tools</span><strong>${project.tools}</strong></div>
   `;
+  renderRelatedProjects(project.id);
 
-  dialog.showModal();
-  document.body.classList.add("is-locked");
+  dialog.classList.remove("is-closing");
+  if (!isDialogOpen) {
+    dialog.showModal();
+    lockPageScroll();
+  }
+  dialog.scrollTop = 0;
 }
 
 function closeProject() {
-  if (dialog.open) dialog.close();
+  if (!dialog.open || dialog.classList.contains("is-closing")) return;
+
+  if (prefersReducedMotion.matches) {
+    dialog.close();
+    return;
+  }
+
+  dialog.classList.add("is-closing");
+  dialogCloseTimer = window.setTimeout(() => {
+    if (dialog.open) dialog.close();
+  }, 220);
 }
 
 renderProjects();
@@ -212,11 +294,24 @@ grid.addEventListener("click", (event) => {
 
 closeButton.addEventListener("click", closeProject);
 doneButton.addEventListener("click", closeProject);
+dialogRelated.addEventListener("click", (event) => {
+  const relatedProject = event.target.closest("[data-related-project]");
+  if (relatedProject) openProject(relatedProject.dataset.relatedProject, relatedProject);
+});
 dialog.addEventListener("click", (event) => {
   if (event.target === dialog) closeProject();
 });
+dialog.addEventListener("cancel", (event) => {
+  event.preventDefault();
+  closeProject();
+});
 dialog.addEventListener("close", () => {
-  document.body.classList.remove("is-locked");
+  window.clearTimeout(dialogCloseTimer);
+  dialogCloseTimer = null;
+  dialog.classList.remove("is-closing");
+  dialog.querySelectorAll("video").forEach((video) => video.pause());
+  dialogMedia.replaceChildren();
+  unlockPageScroll();
   lastProjectTrigger?.focus();
 });
 

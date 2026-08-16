@@ -97,11 +97,11 @@
           </p>
           <div class="hero-actions reveal">
             <a class="button button-dark" href="#about-work">
-              View selected work
+              查看作品
               <i class="ph ph-arrow-down-right" aria-hidden="true"></i>
             </a>
             <a class="text-link" href="#contact">
-              Let’s work together
+              我要合作 
               <i class="ph ph-arrow-up-right" aria-hidden="true"></i>
             </a>
           </div>
@@ -154,7 +154,16 @@
           <div class="capabilities">
             <div>
               <span class="capability-label">Capabilities</span>
-              <p>UI/UX Design, UX Research, Personas, User Journey Mapping, Wireframes, Information Architecture, User Flows, Usability Testing</p>
+              <ul class="capability-list" aria-label="Design capabilities">
+                <li>UI/UX Design</li>
+                <li>UX Research</li>
+                <li>Personas</li>
+                <li>User Journey Mapping</li>
+                <li>Wireframes</li>
+                <li>Information Architecture</li>
+                <li>User Flows</li>
+                <li>Usability Testing</li>
+              </ul>
             </div>
             <div>
               <span class="capability-label">Tools</span>
@@ -303,11 +312,11 @@
         <button class="dialog-close" type="button" aria-label="Close project details">
           <i class="ph ph-x" aria-hidden="true"></i>
         </button>
-        <div class="dialog-visual" id="dialog-visual" aria-hidden="true"></div>
         <div class="dialog-content">
           <p class="dialog-kicker" id="dialog-kicker"></p>
           <h2 id="dialog-title"></h2>
           <p class="dialog-summary" id="dialog-summary"></p>
+          <div class="dialog-media" id="dialog-media"></div>
           <div class="dialog-meta" id="dialog-meta"></div>
           <div class="case-section">
             <h3>Challenge</h3>
@@ -321,8 +330,12 @@
             <h3>Outcome</h3>
             <p id="dialog-outcome"></p>
           </div>
+          <section class="dialog-related-projects" aria-labelledby="dialog-related-title">
+            <h3 id="dialog-related-title">其他專案</h3>
+            <div class="dialog-related-grid" id="dialog-related"></div>
+          </section>
           <button class="button button-dark dialog-done" type="button">
-            Back to projects <i class="ph ph-arrow-left" aria-hidden="true"></i>
+             <i class="ph ph-arrow-left" aria-hidden="true">回上一頁</i>
           </button>
         </div>
       </div>

@@ -46,8 +46,18 @@ svg {
   max-width: 100%;
 }
 
-body.is-locked {
+html.is-locked {
   overflow: hidden;
+  overscroll-behavior: none;
+}
+
+body.is-locked {
+  position: fixed;
+  right: 0;
+  left: 0;
+  width: 100%;
+  overflow: hidden;
+  overscroll-behavior: none;
 }
 
 body.is-menu-open {
@@ -620,8 +630,7 @@ button {
   transform: translateZ(0);
 }
 
-.project-thumb::before,
-.dialog-visual::before {
+.project-thumb::before {
   position: absolute;
   inset: 9%;
   border: 1px solid rgb(10 10 10 / 22%);
@@ -630,8 +639,7 @@ button {
   transition: inset 600ms var(--ease-out), border-radius 600ms var(--ease-out);
 }
 
-.project-thumb::after,
-.dialog-visual::after {
+.project-thumb::after {
   position: absolute;
   width: 46%;
   aspect-ratio: 1;
@@ -639,6 +647,19 @@ button {
   border-radius: 50%;
   content: "";
   transform: translate(46%, -28%);
+  transition: transform 700ms var(--ease-out);
+}
+
+.project-thumb.has-image::before,
+.project-thumb.has-image::after {
+  display: none;
+}
+
+.project-thumb-image {
+  display: block;
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
   transition: transform 700ms var(--ease-out);
 }
 
@@ -682,6 +703,10 @@ button {
   transform: scale(1.08) rotate(-2deg);
 }
 
+.project-trigger:hover .project-thumb-image {
+  transform: scale(1.035);
+}
+
 .project-trigger:hover .thumb-icon {
   opacity: 1;
   transform: translate(0, 0) rotate(0);
@@ -708,6 +733,17 @@ button {
   margin: 0;
   color: var(--muted);
   font-size: 0.78rem;
+}
+
+.project-tags {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 4px 12px;
+  color: #9a9a96 !important;
+}
+
+.project-tags span {
+  white-space: nowrap;
 }
 
 .profile {
@@ -746,9 +782,25 @@ button {
   text-transform: uppercase;
 }
 
-.capabilities p {
-  margin: 0;
-  font-size: 0.9rem;
+.capability-list {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 10px;
+  margin: 12px 0 0;
+  padding: 0;
+  list-style: none;
+}
+
+.capability-list li {
+  padding: 10px 14px;
+  color: var(--ink);
+  background: #f8f8f6;
+  border: 1px solid #e5e5e1;
+  border-radius: 10px;
+  box-shadow: 0 1px 3px rgb(10 10 10 / 5%);
+  font-size: 0.86rem;
+  font-weight: 500;
+  line-height: 1.2;
 }
 
 .tool-icons {
@@ -928,17 +980,26 @@ button {
   max-height: 100%;
   margin: 0;
   padding: 0;
+  overflow-y: auto;
+  overscroll-behavior: contain;
+  -webkit-overflow-scrolling: touch;
   color: var(--ink);
   background: var(--paper);
   border: 0;
   opacity: 0;
   transform: translateY(24px);
-  transition: opacity 300ms ease, transform 500ms var(--ease-out), overlay 500ms allow-discrete, display 500ms allow-discrete;
+  transition: opacity 220ms ease, transform 220ms var(--ease-out);
 }
 
 .project-dialog[open] {
   opacity: 1;
   transform: translateY(0);
+}
+
+.project-dialog.is-closing {
+  opacity: 0;
+  pointer-events: none;
+  transform: translateY(12px);
 }
 
 @starting-style {
@@ -951,10 +1012,17 @@ button {
 .project-dialog::backdrop {
   background: rgb(0 0 0 / 55%);
   backdrop-filter: blur(8px);
+  transition: background-color 220ms ease, backdrop-filter 220ms ease;
+}
+
+.project-dialog.is-closing::backdrop {
+  background: transparent;
+  backdrop-filter: blur(0);
 }
 
 .dialog-shell {
   min-height: 100%;
+  overscroll-behavior: contain;
 }
 
 .dialog-close {
@@ -971,33 +1039,24 @@ button {
   border: 0;
   border-radius: 50%;
   cursor: pointer;
-  transition: transform 350ms var(--ease-out);
+  transition: opacity 160ms ease, transform 220ms var(--ease-out);
 }
 
 .dialog-close:hover {
-  transform: rotate(90deg);
+  transform: rotate(8deg) scale(1.05);
+}
+
+.dialog-close:active {
+  transform: scale(0.9);
+}
+
+.project-dialog.is-closing .dialog-close {
+  opacity: 0;
+  transform: rotate(45deg) scale(0.78);
 }
 
 .dialog-close i {
   font-size: 1.3rem;
-}
-
-.dialog-visual {
-  position: relative;
-  display: grid;
-  place-items: center;
-  min-height: 58svh;
-  overflow: hidden;
-  background: var(--dialog-color, var(--accent));
-}
-
-.dialog-visual span {
-  position: relative;
-  z-index: 1;
-  font-size: clamp(7rem, 21vw, 20rem);
-  font-weight: 500;
-  line-height: 1;
-  letter-spacing: -0.08em;
 }
 
 .dialog-content {
@@ -1008,17 +1067,55 @@ button {
 
 .dialog-content h2 {
   margin: 0;
-  font-size: clamp(2.8rem, 7vw, 7rem);
+  font-size: clamp(2.8rem, 5vw, 4rem);
   font-weight: 500;
   line-height: 1;
   letter-spacing: -0.055em;
 }
 
 .dialog-summary {
-  max-width: 760px;
-  margin: 40px 0 0;
+  /* max-width: 760px; */
+  max-width:fit-content;
+  margin: 24px 0 0;
   color: var(--muted);
-  font-size: clamp(1.05rem, 2vw, 1.4rem);
+  /* font-size: clamp(1.05rem, 2vw, 1.4rem); old */
+  font-size: clamp(0.8125rem, 0.75rem + 0.3vw, 1.0625rem);
+}
+
+.dialog-media {
+  display: none;
+}
+
+.project-dialog.is-media-project .dialog-content {
+  width: min(100%, 1440px);
+}
+
+.project-dialog.is-media-project .dialog-kicker {
+  text-transform: none;
+}
+
+.project-dialog.is-media-project .dialog-meta,
+.project-dialog.is-media-project .case-section {
+  display: none;
+}
+
+.project-dialog.is-media-project .dialog-media {
+  display: grid;
+  gap: clamp(18px, 2.5vw, 36px);
+  margin-top: clamp(36px, 4vw, 84px);
+}
+
+.dialog-media-item {
+  overflow: hidden;
+  background: #140c11;
+  border-radius: clamp(14px, 2vw, 26px);
+}
+
+.dialog-media-item img,
+.dialog-media-item video {
+  display: block;
+  width: 100%;
+  height: auto;
 }
 
 .dialog-meta {
@@ -1066,6 +1163,110 @@ button {
 
 .case-section p {
   color: var(--muted);
+}
+
+.dialog-related-projects {
+  margin-top: clamp(72px, 9vw, 120px);
+  padding-top: 28px;
+  border-top: 1px solid var(--line);
+}
+
+.dialog-related-projects > h3 {
+  margin: 0 0 24px;
+  color: var(--muted);
+  font-size: 0.75rem;
+  font-weight: 600;
+  letter-spacing: 0.1em;
+  text-transform: uppercase;
+}
+
+.dialog-related-grid {
+  display: grid;
+  grid-template-columns: repeat(3, minmax(0, 1fr));
+  gap: clamp(14px, 2vw, 24px);
+}
+
+.dialog-related-card {
+  display: block;
+  min-width: 0;
+  padding: 0;
+  text-align: left;
+  background: transparent;
+  border: 0;
+  cursor: pointer;
+}
+
+.dialog-related-preview {
+  display: grid;
+  aspect-ratio: 4 / 3;
+  overflow: hidden;
+  background: var(--soft);
+  border-radius: clamp(12px, 1.6vw, 20px);
+}
+
+.dialog-related-preview img,
+.dialog-related-placeholder {
+  width: 100%;
+  height: 100%;
+  transition: transform 500ms var(--ease-out);
+}
+
+.dialog-related-preview img {
+  display: block;
+  object-fit: cover;
+}
+
+.dialog-related-placeholder {
+  display: grid;
+  place-items: center;
+  background: var(--related-color, var(--line));
+  font-size: clamp(2.4rem, 5vw, 4.5rem);
+  font-weight: 500;
+  letter-spacing: -0.06em;
+}
+
+.dialog-related-meta {
+  display: flex;
+  align-items: flex-start;
+  justify-content: space-between;
+  gap: 14px;
+  padding: 14px 2px 0;
+}
+
+.dialog-related-meta > span {
+  display: grid;
+  min-width: 0;
+}
+
+.dialog-related-number,
+.dialog-related-meta small {
+  color: var(--muted);
+  font-size: 0.7rem;
+}
+
+.dialog-related-meta strong {
+  margin: 2px 0;
+  font-size: 0.95rem;
+  font-weight: 500;
+  line-height: 1.35;
+}
+
+.dialog-related-meta small {
+  overflow-wrap: anywhere;
+}
+
+.dialog-related-meta i {
+  flex: 0 0 auto;
+  margin-top: 4px;
+  transition: transform 300ms var(--ease-out);
+}
+
+.dialog-related-card:hover .dialog-related-preview > * {
+  transform: scale(1.035);
+}
+
+.dialog-related-card:hover .dialog-related-meta i {
+  transform: translate(3px, -3px);
 }
 
 .dialog-done {
@@ -1261,11 +1462,18 @@ button {
   .site-footer { align-items: flex-start; flex-direction: column; }
   .social-links { flex-wrap: wrap; }
 
-  .dialog-visual { min-height: 42svh; }
   .dialog-content { padding-top: 60px; padding-bottom: 72px; }
   .dialog-content h2 { font-size: clamp(2.25rem, 12vw, 4rem); overflow-wrap: anywhere; }
   .dialog-meta { grid-template-columns: 1fr; }
   .case-section { grid-template-columns: 1fr; gap: 12px; }
+  .dialog-related-grid { grid-template-columns: 1fr; }
+  .dialog-related-card {
+    display: grid;
+    grid-template-columns: minmax(96px, 32vw) minmax(0, 1fr);
+    gap: 14px;
+    align-items: center;
+  }
+  .dialog-related-meta { padding: 0; }
 }
 
 @media (max-width: 420px) {
